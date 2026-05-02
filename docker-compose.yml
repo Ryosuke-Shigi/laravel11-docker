@@ -1,0 +1,190 @@
+# Laravel 11 learning environment.
+# Laravel itself is intentionally not installed yet; ./src is mounted as the future app root.
+
+x-php-service: &php-service
+  image: codex-practice001-php:8.3
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile
+    args:
+      UID: 1000
+      GID: 1000
+  working_dir: /var/www/html
+  volumes:
+    # Keep Laravel source files editable from WSL/Windows while PHP runs in containers.
+    - ./src:/var/www/html
+  networks:
+    - laravel
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      # Laravel will be available at http://localhost:8080 after it is installed in ./src.
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php-fpm
+    networks:
+      - laravel
+
+  php-fpm:
+    <<: *php-service
+    # Web requests from nginx are executed by PHP-FPM.
+    command: php-fpm
+    expose:
+      - "9000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  php-cli:
+    <<: *php-service
+    # General PHP CLI runner. Example: docker compose run --rm php-cli -v
+    entrypoint: ["php"]
+    command: ["-v"]
+
+  artisan:
+    <<: *php-service
+    # Dedicated Laravel artisan runner, used after Laravel is installed in ./src.
+    entrypoint: ["php", "artisan"]
+    command: ["list"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  composer:
+    <<: *php-service
+    # Composer runner. It writes files as UID/GID 1000 to avoid WSL/Windows permission issues.
+    entrypoint: ["composer"]
+    command: ["--version"]
+
+  npm:
+    image: codex-practice001-node:lts
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+      args:
+        UID: 1000
+        GID: 1000
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      # Vite dev server port. Use --service-ports when running npm run dev.
+      - "5173:5173"
+    environment:
+      # File watching is more reliable across Docker Desktop / WSL2 shared filesystems.
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    entrypoint:
+      - sh
+      - -lc
+      - |
+        if [ "$1" = "npm" ]; then
+          shift
+        fi
+        exec npm "$@"
+      - npm-wrapper
+    command: ["--version"]
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      # Optional host access for DB tools. Laravel containers still use mysql:3306 internally.
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Asia/Tokyo
+    volumes:
+      # Persist database data between container restarts.
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - laravel
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      # Optional host access; Laravel containers use the internal host name "redis".
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - laravel
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      # SMTP: mailpit:1025 from Laravel, Web UI: http://localhost:8025
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - laravel
+
+  adminer:
+    image: adminer:latest
+    ports:
+      # Adminer Web UI: http://localhost:8081
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laravel
+
+  queue-worker:
+    <<: *php-service
+    # Start only when queue practice is needed: docker compose --profile worker up -d queue-worker
+    profiles: ["worker"]
+    command: ["php", "artisan", "queue:work", "--verbose", "--tries=3", "--timeout=90"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  scheduler:
+    <<: *php-service
+    # Start only when scheduler practice is needed: docker compose --profile scheduler up -d scheduler
+    profiles: ["scheduler"]
+    command:
+      - sh
+      - -lc
+      - |
+        while true; do
+          php artisan schedule:run --verbose --no-interaction
+          sleep 60
+        done
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+networks:
+  laravel:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:

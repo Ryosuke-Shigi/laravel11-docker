@@ -1,0 +1,23 @@
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Laravel application source is managed by a separate repository.
+src/
+
+# Local command shortcuts are not part of this Docker environment repository.
+Makefile
+bin/
+
+# Local Docker overrides
+docker-compose.override.yml
+
+# Miscellaneous logs
+*.log
