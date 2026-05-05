@@ -59,6 +59,27 @@ services:
       redis:
         condition: service_started
 
+  queue:
+    <<: *php-service
+    # Production-style Laravel queue worker.
+    # Laravel dispatches jobs to Redis when QUEUE_CONNECTION=redis; without this
+    # long-running process, those jobs remain queued and API Catalog sync never
+    # runs after the HTTP request returns.
+    #
+    # This service intentionally reuses the same PHP image, source mount,
+    # working directory, and internal laravel network as php-fpm so queued jobs
+    # execute inside the same application environment as web requests.
+    # No ports are published because workers are internal background processes.
+    command: ["php", "artisan", "queue:work", "redis", "--sleep=3", "--tries=3", "--timeout=120"]
+    restart: unless-stopped
+    depends_on:
+      # Jobs may read/write MySQL and use Redis as the queue backend, so wait
+      # for both dependencies before starting the worker loop.
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   composer:
     <<: *php-service
     # Composer runner. It writes files as UID/GID 1000 to avoid WSL/Windows permission issues.
@@ -154,7 +175,10 @@ services:
 
   queue-worker:
     <<: *php-service
-    # Start only when queue practice is needed: docker compose --profile worker up -d queue-worker
+    # Legacy/profile-based queue practice runner.
+    # Keep this separate from the production-style "queue" service above so old
+    # learning commands still work, while the default stack has a clear worker
+    # service that can be started with: docker compose up -d queue scheduler
     profiles: ["worker"]
     command: ["php", "artisan", "queue:work", "--verbose", "--tries=3", "--timeout=90"]
     depends_on:
@@ -165,17 +189,27 @@ services:
 
   scheduler:
     <<: *php-service
-    # Start only when scheduler practice is needed: docker compose --profile scheduler up -d scheduler
-    profiles: ["scheduler"]
+    # Production-style Laravel scheduler loop.
+    # Laravel's Scheduler does not stay resident by itself; something must run
+    # schedule:run every minute. This container provides that loop in Docker so
+    # routes/console.php schedules, including API Catalog sync dispatches, are
+    # evaluated automatically.
+    #
+    # The scheduler should enqueue work, not duplicate the sync implementation.
+    # Actual queued jobs are processed by the "queue" service. No ports are
+    # published because this is also an internal background process.
     command:
       - sh
       - -lc
       - |
         while true; do
-          php artisan schedule:run --verbose --no-interaction
+          php artisan schedule:run --no-interaction
           sleep 60
         done
+    restart: unless-stopped
     depends_on:
+      # Scheduled tasks can dispatch Redis-backed jobs and may touch the DB
+      # while evaluating Laravel schedule definitions.
       mysql:
         condition: service_healthy
       redis:
