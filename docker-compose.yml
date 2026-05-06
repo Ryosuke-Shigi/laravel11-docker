@@ -20,8 +20,8 @@ services:
   nginx:
     image: nginx:stable-alpine
     ports:
-      # Laravel will be available at http://localhost:8080 after it is installed in ./src.
-      - "8080:80"
+      # Public HTTP endpoint. Only nginx should publish a public web port.
+      - "80:80"
     volumes:
       - ./src:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -97,9 +97,6 @@ services:
     working_dir: /var/www/html
     volumes:
       - ./src:/var/www/html
-    ports:
-      # Vite dev server port. Use --service-ports when running npm run dev.
-      - "5173:5173"
     environment:
       # File watching is more reliable across Docker Desktop / WSL2 shared filesystems.
       CHOKIDAR_USEPOLLING: "true"
@@ -121,7 +118,7 @@ services:
     image: mysql:8.0
     ports:
       # Optional host access for DB tools. Laravel containers still use mysql:3306 internally.
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"
     environment:
       MYSQL_DATABASE: laravel
       MYSQL_USER: laravel
@@ -142,9 +139,8 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      # Optional host access; Laravel containers use the internal host name "redis".
-      - "6379:6379"
+    # Redis is only used by Laravel containers on the internal Docker network.
+    # Do not publish 6379 to the host; services connect with the "redis" host name.
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis-data:/data
@@ -155,8 +151,8 @@ services:
     image: axllent/mailpit:latest
     ports:
       # SMTP: mailpit:1025 from Laravel, Web UI: http://localhost:8025
-      - "1025:1025"
-      - "8025:8025"
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
     networks:
       - laravel
 
@@ -164,7 +160,7 @@ services:
     image: adminer:latest
     ports:
       # Adminer Web UI: http://localhost:8081
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
     environment:
       ADMINER_DEFAULT_SERVER: mysql
     depends_on:
