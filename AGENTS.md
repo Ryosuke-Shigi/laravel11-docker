@@ -12,7 +12,7 @@
 - Action / Service / Repository / DTO / Responder / Component の責務を混ぜない
 - Controller は HTTP 窓口に限定する
 - Request は形式バリデーションに限定する
-- DTO は不変データキャリアとして扱う
+- DTO は原則としてデータキャリアとして扱い、業務判断・DB操作・表示責務を持たせない
 - Repository は DB 操作の抽象に限定する
 - Service は業務判断・ドメインルールを扱う
 - Action はユースケース手順を扱う
@@ -24,7 +24,8 @@
 - 単体DTOは1件分のデータキャリアとして扱う
 - ListDTOは複数件のDTOを束ねるデータキャリアとして扱う
 - DTO には必要に応じて toArray() を実装してよい
-- DTO の toArray() は配列変換までに限定し、JSONレスポンス整形・HTTP出力整形・画面表示判断は行わない
+- DTO の toArray() は配列変換までに限定する
+- DTO の toArray() では JSONレスポンス整形・HTTP出力整形・画面表示判断は行わない
 - ListDTO は複数の DTO を保持し、まとめて配列化するための toArray() を実装してよい
 - ListDTO の toArray() は、保持している各 DTO の toArray() を呼び出して配列化する責務に限定する
 - toJson() やレスポンス生成は DTO / ListDTO ではなく Responder / Component 側の責務とする
