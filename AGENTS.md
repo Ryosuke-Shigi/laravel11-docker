@@ -68,3 +68,56 @@
 - 既存仕様を壊していないか
 - テスト追加・更新が必要な変更か
 - モバイル表示や Inertia props に影響がないか
+
+## Dockerコマンド実行ルール
+
+このプロジェクトでは、npm / artisan / composer を実行するコンテナを分ける。
+
+### npm
+
+React / TypeScript / Vite のビルドは npm コンテナで実行する。
+
+例：
+
+docker compose run --rm npm npm run build
+
+php-fpm コンテナでは npm を実行しない。
+
+### artisan
+
+Laravel の artisan コマンドは Laravel 実行用コンテナで実行する。
+
+例：
+
+docker compose exec php-fpm php artisan optimize:clear
+
+サービス名が異なる場合は、先に docker compose ps で確認する。
+
+### composer
+
+Composer 操作は PHP CLI / Composer 実行用コンテナで行う。
+
+npm コンテナ、nginx コンテナでは composer を実行しない。
+
+### 実行前確認
+
+コマンド実行前に、以下を確認する。
+
+- Docker構成側の作業か
+- Laravelアプリ本体側の作業か
+- 実行対象が npm / artisan / composer のどれか
+- 対応する docker compose サービス名
+- 本番環境で破壊的操作にならないか
+
+### 禁止事項
+
+以下は実行しない。
+
+- php-fpm コンテナで npm run build
+- nginx コンテナで artisan / composer
+- 実行コンテナを推測で決めること
+- 本番環境で migrate:fresh
+- 本番環境で db:wipe
+- docker compose down -v
+- docker system prune
+- docker volume prune
