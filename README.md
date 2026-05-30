@@ -138,7 +138,7 @@ Docker コマンドは WSL2 Ubuntu 上のプロジェクトルートで実行す
 
 ```bash
 docker compose build
-docker compose up -d nginx php-fpm queue scheduler mysql redis mailpit adminer
+docker compose up -d nginx php-fpm queue scheduler mysql redis minio mailpit adminer
 docker compose run --rm composer install
 docker compose run --rm npm install
 docker compose run --rm artisan migrate
@@ -158,7 +158,7 @@ docker compose run --rm npm npm run build
 本番は AWS S3 を使い、ローカル開発では MinIO を S3 互換ストレージとして使います。
 Laravel 側の保存処理は `Storage::disk('s3')` に統一し、接続先の違いは `.env` と Docker Compose で切り替えます。
 
-MinIO は必要なときだけ起動します。既存の全体起動コマンドには含めていません。
+MinIO は `make up` の全体起動に含めています。単体で起動・確認したい場合は次のコマンドを使います。
 
 ```bash
 make minio-up
