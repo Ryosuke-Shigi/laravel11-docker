@@ -1,5 +1,5 @@
 DC ?= docker compose
-APP_SERVICES ?= nginx php-fpm queue scheduler mysql redis mailpit adminer
+APP_SERVICES ?= nginx php-fpm queue scheduler mysql redis minio mailpit adminer
 
 cmd ?=
 c ?= $(cmd)
@@ -17,7 +17,7 @@ build: ## Build Docker images
 rebuild: ## Rebuild Docker images without cache
 	$(DC) build --no-cache
 
-up: ## Start nginx, php-fpm, queue, scheduler, mysql, redis, mailpit, and adminer
+up: ## Start nginx, php-fpm, queue, scheduler, mysql, redis, minio, mailpit, and adminer
 	$(DC) up -d $(APP_SERVICES)
 
 start: up ## Alias for up
