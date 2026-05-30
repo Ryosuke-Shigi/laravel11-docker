@@ -148,19 +148,29 @@ services:
       - laravel
 
   minio:
+    # Local-only S3-compatible object storage.
+    # Production storage is AWS S3; this service exists so local development can
+    # exercise the same Laravel "s3" disk without adding MinIO-specific app code.
     image: quay.io/minio/minio
-    # Local S3-compatible storage for development. Production uses AWS S3.
+    # Port 9000 serves the S3 API. Port 9001 serves the browser console.
+    # Keep the console address explicit so both endpoints are predictable.
     command: server /data --console-address ":9001"
     environment:
+      # Development-only root credentials for the local MinIO container.
+      # Do not reuse these values for AWS S3 or any production environment.
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio_password
     ports:
-      # S3 API: http://localhost:9000, Console: http://localhost:9001
+      # Bind only to localhost. This keeps the S3 API and Console reachable from
+      # the developer machine without exposing them on the external network.
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
     volumes:
+      # Persist buckets and local test objects across container restarts.
+      # This is Docker-managed local data, not application source.
       - minio-data:/data
     networks:
+      # Laravel containers reach MinIO at http://minio:9000 on this network.
       - laravel
 
   mailpit:
@@ -234,4 +244,6 @@ networks:
 volumes:
   mysql-data:
   redis-data:
+  # Stores local MinIO buckets and objects. Keep it separate from MySQL/Redis so
+  # object storage can be reset independently when needed.
   minio-data:
