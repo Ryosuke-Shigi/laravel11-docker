@@ -130,6 +130,7 @@ Docker コマンドは WSL2 Ubuntu 上のプロジェクトルートで実行す
 - `scheduler`: Laravel Scheduler
 - `mysql`: APIカタログキャッシュと保存メモのDB
 - `redis`: Queue / Cache 用
+- `minio`: ローカル開発用の S3 互換ストレージ
 - `mailpit`: メール確認用
 - `adminer`: DB確認用
 
@@ -150,6 +151,54 @@ docker compose run --rm npm npm run build
 - Vite: http://localhost:5173
 - Mailpit: http://localhost:8025
 - Adminer: http://localhost:8081
+- MinIO Console: http://localhost:9001
+
+### ローカルS3 / MinIO
+
+本番は AWS S3 を使い、ローカル開発では MinIO を S3 互換ストレージとして使います。
+Laravel 側の保存処理は `Storage::disk('s3')` に統一し、接続先の違いは `.env` と Docker Compose で切り替えます。
+
+MinIO は必要なときだけ起動します。既存の全体起動コマンドには含めていません。
+
+```bash
+make minio-up
+make minio-ps
+make minio-logs
+```
+
+直接 Docker Compose で確認する場合:
+
+```bash
+docker compose up -d minio
+docker compose ps minio
+docker compose logs --tail=50 minio
+```
+
+ローカルの `src/.env` には次の値を設定します。本番用の AWS キーはリポジトリへ書きません。
+
+```dotenv
+FILESYSTEM_DISK=s3
+AWS_ACCESS_KEY_ID=minio
+AWS_SECRET_ACCESS_KEY=minio_password
+AWS_DEFAULT_REGION=ap-northeast-1
+AWS_BUCKET=local-bucket
+AWS_ENDPOINT=http://minio:9000
+AWS_URL=http://localhost:9000/local-bucket
+AWS_USE_PATH_STYLE_ENDPOINT=true
+```
+
+MinIO Console で `local-bucket` を作成してから、Laravel から保存確認します。
+
+```bash
+make app-clear
+docker compose exec php-fpm php artisan tinker
+```
+
+Tinker では次を実行します。
+
+```php
+Storage::disk('s3')->put('test/hello.txt', 'hello minio');
+```
 
 同期処理の手動確認:
 
