@@ -12,8 +12,7 @@ Thumbs.db
 # Laravel application source is managed by a separate repository.
 src/
 
-# Local command shortcuts are not part of this Docker environment repository.
-Makefile
+# Local home-level command shortcuts are not part of this Docker environment repository.
 bin/
 
 # Local Docker overrides
