@@ -1,4 +1,6 @@
 DC ?= docker compose
+# Default local stack. MinIO is included so Storage::disk('s3') works after a
+# normal "make up" without starting object storage by hand.
 APP_SERVICES ?= nginx php-fpm queue scheduler mysql redis minio mailpit adminer
 
 cmd ?=
@@ -56,6 +58,7 @@ optimize-clear: ## Run php artisan optimize:clear
 
 clear: optimize-clear ## Alias for optimize-clear
 
+# Use the running app container after changing .env values such as AWS_ENDPOINT.
 app-clear: ## Run php artisan optimize:clear in the running php-fpm container
 	$(DC) exec php-fpm php artisan optimize:clear
 
@@ -110,11 +113,14 @@ scheduler-up: ## Start the scheduler
 
 scheduler: scheduler-up ## Alias for scheduler-up
 
+# Start only object storage when the rest of the stack is already running.
 minio-up: ## Start local MinIO
 	$(DC) up -d minio
 
+# Useful for checking API/Console startup and credential-related failures.
 minio-logs: ## Show recent MinIO logs
 	$(DC) logs --tail=50 minio
 
+# Confirms localhost-bound 9000/9001 ports and container health at a glance.
 minio-ps: ## Show MinIO container status
 	$(DC) ps minio
