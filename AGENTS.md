@@ -1,123 +1,52 @@
 # AGENTS.md
 
+このファイルは、AIエージェントが最初に読むための薄い入口です。
+詳細な設計方針、DTO運用、テスト、PR、セキュリティ方針は `docs/` を参照してください。
+
 ## 基本方針
 
-このプロジェクトでは、AIを丸投げ実装者として扱わない。
+このリポジトリでは、AIを丸投げ実装者として扱いません。
 
-人間が仕様・責務・設計境界・レビュー観点を決め、AIは実装補助・調査・差分修正・レビュー補助として使う。
+仕様確定、責務境界、テスト観点、完成判定、本番反映判断は人間が行い、AIは実装補助、調査、差分修正、レビュー補助として使います。
 
-## アーキテクチャ方針
+## 作業前に読むドキュメント
 
-- ADR / レイヤード構成を崩さない
-- Action / Service / Repository / DTO / Responder / Component の責務を混ぜない
-- Controller は HTTP 窓口に限定する
+- [README.md](README.md): アプリ概要、起動手順、テスト手順、PR運用の概要
+- [docs/architecture.md](docs/architecture.md): ADRパターンとレイヤードアーキテクチャ
+- [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
+- [docs/testing.md](docs/testing.md): TDDとテスト境界
+- [docs/development-flow.md](docs/development-flow.md): 仕様整理からPRまでの流れ
+- [docs/pr-checklist.md](docs/pr-checklist.md): PR前チェックリスト
+- [docs/security.md](docs/security.md): 秘密情報と本番環境の扱い
+
+## 責務境界
+
+- Controller は HTTP 入口に限定する
 - Request は形式バリデーションに限定する
-- DTO は原則としてデータキャリアとして扱い、業務判断・DB操作・表示責務を持たせない
-- Repository は DB 操作の抽象に限定する
-- Service は業務判断・ドメインルールを扱う
 - Action はユースケース手順を扱う
-- Responder は出力整形に限定する
+- Service は業務判断、ドメインルール、状態判断を扱う
+- Repository は DB 操作や外部データ取得の境界を扱う
+- DTO / ListDTO はレイヤー間のデータキャリアとして扱う
+- Responder はレスポンスや Inertia props などの出力整形を扱う
 - Component は画面表示責務に限定する
 
-## DTO 方針
+## DTOで禁止すること
 
-- 単体DTOは1件分のデータキャリアとして扱う
-- ListDTOは複数件のDTOを束ねるデータキャリアとして扱う
-- DTO には必要に応じて toArray() を実装してよい
-- DTO の toArray() は配列変換までに限定する
-- DTO の toArray() では JSONレスポンス整形・HTTP出力整形・画面表示判断は行わない
-- ListDTO は複数の DTO を保持し、まとめて配列化するための toArray() を実装してよい
-- ListDTO の toArray() は、保持している各 DTO の toArray() を呼び出して配列化する責務に限定する
-- toJson() やレスポンス生成は DTO / ListDTO ではなく Responder / Component 側の責務とする
-- DTO / ListDTO には業務判断・DB操作・HTTPレスポンス生成・画面表示判断を持たせない
+DTO / ListDTO に次の責務を持たせないでください。
+
+- DBアクセス
+- 業務判断
+- HTTPレスポンス生成
+- JSONレスポンス生成
+- View / Inertia / React 用の表示判断
 
 ## 作業ルール
 
-- 実装前に変更対象ファイルと変更方針を確認する
+- 変更対象ファイルと変更方針を確認してから編集する
 - 最小差分で修正する
-- 既存の責務分離を崩さない
-- 不要なリファクタリングを同時に行わない
-- 仕様にない機能追加を勝手に行わない
-- 実装後は差分確認を行う
-- 可能な場合はテスト、または確認コマンドを実行する
+- 目的外のアプリ機能追加、DB変更、Docker構成変更をしない
+- `.env` の実値、APIキー、DBパスワード、AWSキーなどの秘密情報を書かない
+- 変更後は差分を確認する
+- テストが必要な変更では、既存のテスト方針に従って確認する
 
-## テスト追加方針
-
-- 変更が Service / DTO / Repository / Action / Job / Inertia props に影響する場合は、テスト追加・更新を検討する
-- 必要な場合は、既存仕様を壊さない範囲で最小限のテストを追加する
-- テスト追加が不要な場合は、その理由を簡潔に示す
-- `php artisan test` で確認できる状態を優先する
-- テストはコードレビューの代替ではなく、仕様破壊を検知するための補助とする
-
-## subagents 運用
-
-- subagents は必要な場合のみ使う
-- 原則としてレビュー・調査・テスト観点確認に使う
-- 小さい修正では使わない
-- 同じファイルを複数エージェントで同時編集しない
-- 各 subagent の結果を統合してから人間が最終判断する
-- 実装の並列化には慎重にする
-
-## レビュー観点
-
-変更後は、少なくとも以下を確認する。
-
-- 責務境界が崩れていないか
-- 不要な依存が増えていないか
-- DTO / Repository / Service / Action の役割が混ざっていないか
-- 既存仕様を壊していないか
-- テスト追加・更新が必要な変更か
-- モバイル表示や Inertia props に影響がないか
-
-## Dockerコマンド実行ルール
-
-このプロジェクトでは、npm / artisan / composer を実行するコンテナを分ける。
-
-### npm
-
-React / TypeScript / Vite のビルドは npm コンテナで実行する。
-
-例：
-
-docker compose run --rm npm npm run build
-
-php-fpm コンテナでは npm を実行しない。
-
-### artisan
-
-Laravel の artisan コマンドは Laravel 実行用コンテナで実行する。
-
-例：
-
-docker compose exec php-fpm php artisan optimize:clear
-
-サービス名が異なる場合は、先に docker compose ps で確認する。
-
-### composer
-
-Composer 操作は PHP CLI / Composer 実行用コンテナで行う。
-
-npm コンテナ、nginx コンテナでは composer を実行しない。
-
-### 実行前確認
-
-コマンド実行前に、以下を確認する。
-
-- Docker構成側の作業か
-- Laravelアプリ本体側の作業か
-- 実行対象が npm / artisan / composer のどれか
-- 対応する docker compose サービス名
-- 本番環境で破壊的操作にならないか
-
-### 禁止事項
-
-以下は実行しない。
-
-- php-fpm コンテナで npm run build
-- nginx コンテナで artisan / composer
-- 実行コンテナを推測で決めること
-- 本番環境で migrate:fresh
-- 本番環境で db:wipe
-- docker compose down -v
-- docker system prune
-- docker volume prune
+今回のような docs のみの変更では、アプリテスト実行は必須ではありません。ただし、リンク切れ、Markdownの表示崩れ、目的外のコード変更がないことは確認してください。

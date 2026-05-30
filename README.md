@@ -1,60 +1,112 @@
 # API Discovery Hub
 
-API Discovery Hub は、APIs.guru の公開APIカタログ `list.json` を同期キャッシュとして取り込み、公開APIを検索・保存・調査するためのポートフォリオアプリです。
+API Discovery Hub は、APIs.guru の公開APIカタログ `list.json` を同期キャッシュとして取り込み、公開APIを検索、保存、調査するための Laravel + Docker ポートフォリオアプリです。
 
-- 公開URL: 確認後に記載
-- できること: API一覧検索、provider / domain 絞り込み、詳細確認、調査メモ保存、手動同期、外部API確認、UIモック確認
-- 技術スタック: Laravel 11, Docker, Inertia, React, TypeScript, MySQL, Redis
-- 設計上の見どころ: ADRパターン、レイヤードアーキテクチャ、DTO、Repository、Service、Action、Responder、Queue
-- AI駆動開発の位置づけ: 仕様決定や完成判定は人間が行い、ChatGPT / CodexApp は設計整理・レビュー観点整理・既存コード確認・差分作成の補助として使う
+このリポジトリでは、AIを丸投げ実装者として扱いません。人間が仕様、責務、DTO、テスト、レビュー境界を握り、ChatGPT / CodexApp / Codex IDE は設計整理、実装補助、差分修正、レビュー観点整理に使います。
 
-## プロジェクト概要
+## アプリ概要
 
-公開APIを調べるときは、API 名、提供元、OpenAPI 定義 URL、更新日、関連検索を行き来することが多くなります。
+公開APIを調べるときは、API名、提供元、OpenAPI定義URL、更新日、関連検索を行き来することが多くなります。
 
-このプロジェクトでは、その調査の入口を小さなアプリとして作りながら、Laravel 11 + Inertia + React + TypeScript の構成、ADR パターン、レイヤードアーキテクチャ、CQRS、DTO、Repository、Service、Action、Responder の責務分離を練習・検証しています。
-
-API Discovery Hub は AWS Lightsail での外部公開を前提にしています。ただし、現在この README と設定ファイルから公開URLを確認できなかったため、公開URLは確認後に記載します。
-
-## 公開URL
-
-公開URL: 確認後に記載
-
-ローカル確認 URL は次のとおりです。
-
-- Laravel: http://localhost:8080
-- Vite: http://localhost:5173
-- Mailpit: http://localhost:8025
-- Adminer: http://localhost:8081
-
-## できること
+このアプリでは、その調査の入口として次の機能を提供します。
 
 - APIs.guru `list.json` から公開APIカタログを取得
 - `api_catalog_cache` への同期キャッシュ保存
-- APIs.guru から消えた API を `is_active=false` として扱う差分同期
-- API 一覧のキーワード検索、provider 絞り込み、domain 絞り込み
-- 更新日時や名称など、このアプリ内の指標による並び替え
+- APIs.guru から消えたAPIを `is_active=false` として扱う差分同期
+- API一覧のキーワード検索、provider 絞り込み、domain 絞り込み
+- 更新日時や名称など、アプリ内の指標による並び替え
 - URL query による検索条件、並び順、ページ番号の保持
-- API 詳細でのキャッシュ済みメタ情報表示
-- Google 検索リンクの表示時生成
-- API ごとの調査メモ保存、更新、削除
+- API詳細でのキャッシュ済みメタ情報表示
+- Google検索リンクの表示時生成
+- APIごとの調査メモ保存、更新、削除
 - Queue による手動同期開始
 - Scheduler による定期同期 Job 投入
-- API Preview での外部 API 疎通確認
-- モック画面での UI 確認
+- API Preview での外部API疎通確認
+- モック画面でのUI確認
 
-React 画面は、同期 Job の登録と同期ステータス確認の導線を持っています。同期失敗ログや同期履歴表示としての整理は、今後追加予定です。
+公開URLは確認後に記載します。
+
+## 見てほしいポイント
+
+このポートフォリオで重視しているのは、機能量だけではなく「AIを制御して開発する運用」です。
+
+- AI駆動開発でも、仕様確定、責務境界、完成判定、本番反映判断は人間が行う
+- ADRパターンとレイヤードアーキテクチャで、HTTP入口、ユースケース、業務判断、DB境界、出力整形を分離する
+- Controller / Request / Action / Service / Repository / DTO / Factory / Strategy / Responder / Event / Listener の責務を混ぜない
+- DTO / ListDTO をレイヤー間の境界として扱い、配列や Model の受け渡しを曖昧にしない
+- TDDとテストで、AIが壊してはいけない仕様を固定する
+- PR前チェックリストで、目的外の変更、責務違反、秘密情報の混入を確認する
+
+## ドキュメント
+
+AIエージェント用の入口と、設計・運用ドキュメントを分けています。
+
+- [AGENTS.md](AGENTS.md): AIエージェントが最初に読む薄い入口
+- [docs/architecture.md](docs/architecture.md): ADRパターンとレイヤードアーキテクチャ
+- [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
+- [docs/testing.md](docs/testing.md): TDDとテスト境界
+- [docs/development-flow.md](docs/development-flow.md): 仕様整理からPRまでの流れ
+- [docs/pr-checklist.md](docs/pr-checklist.md): PR前チェックリスト
+- [docs/security.md](docs/security.md): 秘密情報と本番環境の扱い
+
+## AI駆動開発の運用方針
+
+このリポジトリでは、AIに仕様決定や完成判定を任せません。
+
+- 人間が仕様、責務、境界、DB設計、テスト観点を先に決める
+- ChatGPT は設計整理、責務分離の壁打ち、レビュー観点整理に使う
+- CodexApp / Codex IDE は既存コード確認、差分作成、実装補助、README / docs 整理に使う
+- 最終判断、仕様確定、レビュー、本番反映判断は人間が行う
+- `.env` の実値、APIキー、DBパスワード、AWSキーなどの秘密情報はAIに渡さない
+
+「AIで雑に作ったアプリ」ではなく、「人間が設計判断を持ち、AIを補助として使うための運用を持つポートフォリオ」として扱っています。
+
+## アーキテクチャ方針
+
+API Discovery Hub は、ADRパターンとレイヤードアーキテクチャを基準にしています。
+
+ここでいう ADR は Architectural Decision Record ではなく、Action / Domain / Responder の分離を指します。
+
+- Controller は HTTP 入口に限定する
+- Request は入力バリデーションに限定する
+- Action は 1ユースケースの手順を担当する
+- Command は登録、更新、削除、同期開始など状態変更を扱う
+- Query は一覧、詳細、検索など状態を変えない取得を扱う
+- Service は同期時の業務ルールや状態判断を担当する
+- Repository は DB取得、保存、Eloquentクエリ、外部API通信の境界を担当する
+- DTO / ListDTO はレイヤー間のデータ受け渡しに使う
+- Responder は Inertia props など出力形式の整形を担当する
+- Factory は DTO生成や Strategy / Responder 選択を担当する
+- Strategy は処理差分やアルゴリズム差分を担当する
+- Event / Listener は発生した事実と、その後の副作用を分けて扱う
+
+詳細は [docs/architecture.md](docs/architecture.md) を参照してください。
+
+## DTO / ListDTO 方針
+
+DTO はレイヤー間のデータキャリアとして扱います。
+
+- 単体DTOは1件分のデータを表す
+- ListDTOは複数件のDTOを束ねる
+- DTO名は必ず「集約名 + 操作 + DTO」にする
+- ディレクトリに集約名が含まれていても、DTOクラス名から集約名を省略しない
+- DB境界DTO、Repository入力DTOでは `snake_case` を許容する
+- 業務DTO、画面出力DTO、Component props 用DTOでは `camelCase` を使う
+- DTO の `toArray()` は配列変換までに限定する
+- DTO に DBアクセス、業務判断、HTTPレスポンス生成、JSON生成、表示判断を持たせない
+
+詳細は [docs/dto.md](docs/dto.md) を参照してください。
 
 ## 画面導線
 
 短時間で見る場合は、まず `/` から全体の入口を確認し、次に `/lab` から実験画面と本番画面の関係を見ると流れを追いやすいです。
 
-- `/`: ポートフォリオ入口。アプリ全体の起点として見る画面です。
-- `/lab`: 実験・機能一覧。API Preview と API Discovery Hub への導線をまとめています。
-- `/api-preview`: 外部API確認用画面。APIs.guru の実取得、成功モック、エラーモックの入口です。
-- `/api-catalog`: API Discovery Hub の本番一覧。公開APIカタログの検索、絞り込み、並び替え、同期開始を確認できます。
-- `/api-catalog/{apiKey}`: API詳細。提供元、preferred version、OpenAPI URL、更新日時、調査メモの保存・更新・削除を確認できます。
-- `/api-catalog/mock`: UI確認用モック一覧。外部APIや同期キャッシュに依存せず、一覧UIの見た目と導線を確認できます。
+- `/`: ポートフォリオ入口
+- `/lab`: 実験・機能一覧
+- `/api-preview`: 外部API確認用画面
+- `/api-catalog`: API Discovery Hub の本番一覧
+- `/api-catalog/{apiKey}`: API詳細、調査メモ保存
+- `/api-catalog/mock`: UI確認用モック一覧
 
 補助的なルートとして、`/api-preview/apis-guru`、`/api-preview/apis-guru/mock`、`/api-preview/apis-guru/mock-error`、`/api-catalog/sync`、`/api-catalog/sync/status`、`/api-catalog/mock/{apiKey}`、`/api-catalog/{apiKey}/notes` があります。
 
@@ -66,66 +118,7 @@ React 画面は、同期 Job の登録と同期ステータス確認の導線を
 - Infrastructure: Docker Compose, nginx, php-fpm, AWS Lightsail
 - Development tools: Composer, npm, PHPUnit, Laravel Pint, Mailpit, Adminer
 
-## 設計方針
-
-API Discovery Hub は、ADR パターンとレイヤードアーキテクチャを基準にしています。
-
-- Controller は HTTP 入口に限定する
-- Request は入力バリデーションに限定する
-- Action は 1 ユースケースの手順を担当する
-- Command は登録、更新、削除、同期開始など状態変更を扱う
-- Query は一覧、詳細、検索など状態を変えない取得を扱う
-- Service は同期時の業務ルールや状態判断を担当する
-- Repository は DB 取得・保存、Eloquent クエリ、外部 API 通信の境界を担当する
-- DTO はレイヤー間のデータ受け渡しに使う
-- Responder は Inertia props など出力形式の整形を担当する
-- Factory は DTO 生成や Strategy / Responder 選択を担当する
-- Strategy は処理差分やアルゴリズム差分を担当する
-- Event / Listener は発生した事実と、その後の副作用を分けて扱う
-
-API Preview と API Discovery Hub 本体は分離しています。Preview 側の Repository / DTO / Responder は、本体側に流用しない方針です。
-
-## AI駆動開発の方針
-
-このリポジトリでは、AI に仕様決定や完成判定を任せません。
-
-- 人間が仕様、責務、境界、DB 設計、テスト観点を先に決める
-- ChatGPT は設計整理、責務分離の壁打ち、レビュー観点整理に使う
-- CodexApp は既存コード確認、差分作成、実装補助、README 整理に使う
-- 最終判断、仕様確定、レビュー、本番反映判断は人間が行う
-
-「AIが自律的に作ったアプリ」ではなく、「人間が設計判断を持ち、AIを補助として使った開発ポートフォリオ」として扱っています。
-
-## テスト・エラー処理
-
-実装済みの Feature テストでは、API Discovery Hub と API Preview の主要導線を確認しています。
-
-- `ApiCatalogSyncTest`: 同期 Job の Queue 投入、同期開始レスポンス、return_url の制限、同期ステータス、失敗状態の扱いを確認
-- `ApiCatalogNoteTest`: API詳細表示 props、保存メモの保存・更新・削除、別APIメモの更新防止、モック詳細で保存しないことを確認
-- `ApiPreviewTest`: API Preview 一覧、APIs.guru の実取得時 props、エラーレスポンス時 props、成功モック、エラー確認用モックを確認
-
-外部API取得では、成功レスポンスだけでなく、失敗レスポンスや固定エラー表示の確認導線も用意しています。外部通信に依存しないモック画面により、UI とエラー表示を切り分けて確認できます。
-
-今後予定として、Service / Action / Repository の Unit テスト拡充、同期失敗ログ、同期履歴表示、失敗通知の整理を追加していきます。
-
-テスト実行コマンド:
-
-```bash
-docker compose run --rm artisan test
-docker compose run --rm npm run build
-```
-
-## データ保存方針
-
-- `api_catalog_cache` は同期キャッシュ用テーブルとして扱う
-- `raw_payload` は保存しない
-- OpenAPI 定義本文、paths、schemas、parameters、responses は最初から保存しない
-- Google 検索リンクは DB に保存しない
-- Google 検索リンクは表示時に API 名などから生成する
-- `domain` は DB カラムとして追加せず、`provider_key` から表示・絞り込み用に扱う
-- softDeletes は使わない
-
-## Docker構成
+## 起動手順
 
 Docker コマンドは WSL2 Ubuntu 上のプロジェクトルートで実行する前提です。Windows / PowerShell の UNC パス経由で実行すると、bind mount の都合で `docker compose run` が失敗する場合があります。
 
@@ -135,7 +128,7 @@ Docker コマンドは WSL2 Ubuntu 上のプロジェクトルートで実行す
 - `php-fpm`: Laravel アプリ実行
 - `queue`: Queue worker
 - `scheduler`: Laravel Scheduler
-- `mysql`: API カタログキャッシュと保存メモのDB
+- `mysql`: APIカタログキャッシュと保存メモのDB
 - `redis`: Queue / Cache 用
 - `mailpit`: メール確認用
 - `adminer`: DB確認用
@@ -148,8 +141,15 @@ docker compose up -d nginx php-fpm queue scheduler mysql redis mailpit adminer
 docker compose run --rm composer install
 docker compose run --rm npm install
 docker compose run --rm artisan migrate
-docker compose run --rm npm run build
+docker compose run --rm npm npm run build
 ```
+
+ローカル確認URL:
+
+- Laravel: http://localhost:8080
+- Vite: http://localhost:5173
+- Mailpit: http://localhost:8025
+- Adminer: http://localhost:8081
 
 同期処理の手動確認:
 
@@ -157,6 +157,66 @@ docker compose run --rm npm run build
 docker compose run --rm artisan api-catalog:sync
 docker compose run --rm artisan api-catalog:sync --queue
 ```
+
+## テスト手順
+
+Laravel のテスト:
+
+```bash
+docker compose run --rm artisan test
+```
+
+React / TypeScript / Vite のビルド確認:
+
+```bash
+docker compose run --rm npm npm run build
+```
+
+docs のみの変更では、アプリテスト実行は必須ではありません。ただし、Markdown表示、リンク切れ、目的外のコード変更がないことを確認します。
+
+テスト方針の詳細は [docs/testing.md](docs/testing.md) を参照してください。
+
+## PR運用
+
+PRでは、AIが作った差分であっても説明責任は人間が持ちます。
+
+基本の流れ:
+
+1. 仕様整理
+2. 入力定義
+3. 出力定義
+4. DTO / ListDTO 設計
+5. 責務分離
+6. テスト観点整理
+7. CodexApp / Codex IDE への指示作成
+8. 実装
+9. テスト実行
+10. 差分確認
+11. PR作成
+12. 人間レビュー
+13. main反映
+
+PR作成前には [docs/pr-checklist.md](docs/pr-checklist.md) を使い、目的外の変更、責務違反、DTO境界、テスト、秘密情報の混入を確認します。
+
+## テスト・エラー処理の現状
+
+実装済みの Feature テストでは、API Discovery Hub と API Preview の主要導線を確認しています。
+
+- `ApiCatalogSyncTest`: 同期 Job の Queue 投入、同期開始レスポンス、return_url の制限、同期ステータス、失敗状態の扱いを確認
+- `ApiCatalogNoteTest`: API詳細表示 props、保存メモの保存、更新、削除、別APIメモの更新防止、モック詳細で保存しないことを確認
+- `ApiPreviewTest`: API Preview 一覧、APIs.guru の実取得時 props、エラーレスポンス時 props、成功モック、エラー確認用モックを確認
+
+外部API取得では、成功レスポンスだけでなく、失敗レスポンスや固定エラー表示の確認導線も用意しています。外部通信に依存しないモック画面により、UI とエラー表示を切り分けて確認できます。
+
+## データ保存方針
+
+- `api_catalog_cache` は同期キャッシュ用テーブルとして扱う
+- `raw_payload` は保存しない
+- OpenAPI 定義本文、paths、schemas、parameters、responses は最初から保存しない
+- Google検索リンクは DB に保存しない
+- Google検索リンクは表示時に API名などから生成する
+- `domain` は DB カラムとして追加せず、`provider_key` から表示・絞り込み用に扱う
+- softDeletes は使わない
 
 ## ディレクトリ構成
 
@@ -177,6 +237,14 @@ docker compose run --rm artisan api-catalog:sync --queue
 - `src/routes/web.php`: 画面ルート
 - `src/tests/Feature`: Feature テスト
 
+## セキュリティ
+
+`.env` の実値、APIキー、DBパスワード、AWSキーなどの秘密情報は、README、docs、Issue、PR、AIへの指示文に書きません。
+
+本番DB、本番API、本番環境はAIに直接操作させません。docs に書くのは、環境変数名、用途、取得元、必須/任意、セットアップ手順までに限定します。
+
+詳細は [docs/security.md](docs/security.md) を参照してください。
+
 ## 今後予定
 
 - 公開URLの README 反映
@@ -189,12 +257,6 @@ docker compose run --rm artisan api-catalog:sync --queue
 - Service / Action / Repository の Unit テスト拡充
 - Factory / Strategy の使いどころの検証
 - Lightsail 運用手順の整理
-
-## 注意事項
-
-この README は、現在実装済みの範囲に合わせています。API Discovery Hub は公開APIを探す補助とAPI調査の入口を目的にしたアプリであり、API の価値や注目度を断定するものではありません。
-
-公開URLは、この README と設定ファイルからは確認できなかったため未記載です。確認後、`公開URL` と `GitHub About 設定案` の Website に反映します。
 
 ## GitHub About 設定案
 
