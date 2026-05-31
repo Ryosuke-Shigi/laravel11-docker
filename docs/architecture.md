@@ -48,11 +48,15 @@ Repository は DB 操作や外部データ取得の境界です。
 
 Eloquent クエリ、永続化、検索条件の適用、外部APIからの取得などを扱います。Repository に業務判断を混ぜず、Service や Action から渡された条件に基づいてデータ操作を行います。
 
+DanceShortsRadar の YouTube 同期では、YouTube API 取得と DB 保存を別 Repository に分けます。YouTube API Repository は search.list / videos.list の呼び出しと DTO 変換だけを担当し、動画本体の upsert、snapshot 作成、最新 snapshot 取得は DB 保存用 Repository に閉じます。
+
 ### DTO
 
 DTO はレイヤー間のデータキャリアです。
 
 InputDTO、OutputDTO、ListDTO、Repository入力DTO、Component props 用DTOなど、境界ごとに必要なデータを明示します。DTO は DBアクセス、業務判断、HTTPレスポンス生成を行いません。
+
+DanceShortsRadar では、YouTube API 由来 DTO と DB 保存 DTO を分けます。動画本体用 DTO は `dance_short_videos` の保存値だけを持ち、snapshot 用 DTO は取得時点の `view_count` / `like_count` / `comment_count` だけを持ちます。`view_count_delta`、`view_growth_rate`、`views_per_hour` は snapshot 比較から算出する派生値として扱い、DB 保存 DTO には含めません。
 
 ### Factory
 
