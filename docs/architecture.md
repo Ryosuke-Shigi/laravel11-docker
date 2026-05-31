@@ -58,6 +58,12 @@ InputDTO、OutputDTO、ListDTO、Repository入力DTO、Component props 用DTOな
 
 DanceShortsRadar では、YouTube API 由来 DTO と DB 保存 DTO を分けます。動画本体用 DTO は `dance_short_videos` の保存値だけを持ち、snapshot 用 DTO は取得時点の `view_count` / `like_count` / `comment_count` だけを持ちます。`view_count_delta`、`view_growth_rate`、`views_per_hour` は snapshot 比較から算出する派生値として扱い、DB 保存 DTO には含めません。
 
+DanceShortsRadar の追跡状態は `dance_short_videos.tracking_status` で管理します。候補は `active` / `inactive` / `archived` とし、snapshot 保存対象は `active` の動画だけに限定します。`inactive` / `archived` の動画本体は物理削除せず、再観測・比較に使わない状態として残します。
+
+DanceShortsRadar の snapshot cleanup は、sync 後に自動実行するユースケースとして扱います。保持期間は画面最大比較期間 30日 + 余白5日の 35日を初期方針とし、保持期間を超えた `dance_short_video_snapshots` だけを物理削除します。`dance_short_videos`、`dance_short_regions`、`dance_short_search_keywords`、`dance_short_video_categories` は cleanup 対象にしません。
+
+DanceShortsRadar の YouTube API 同期 Scheduler はこの段階では追加しません。将来 Scheduler を追加する場合も、`DANCE_SHORT_SYNC_ENABLED` のような config / env gate で明示的に有効化した環境だけが定期同期し、local では自動同期を OFF にします。cleanup は YouTube API を呼ばないため、手動 sync の後続処理や手動 command から実行できます。
+
 ### Factory
 
 Factory は生成や選択の責務を扱います。

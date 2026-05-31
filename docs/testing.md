@@ -63,6 +63,12 @@ Repository は DB 操作や外部データ取得の境界です。
 
 DanceShortsRadar の DB 保存 Repository では、`youtube_video_id` による動画本体の upsert、重複 insert 防止、snapshot の追加保存、最新 snapshot 取得を確認します。Shorts 判定や伸び率の意味づけは Repository テストへ持ち込まず、Service テストで確認します。
 
+DanceShortsRadar の tracking / retention / cleanup では、Service テストで `active` の動画だけが snapshot 保存対象になること、`inactive` / `archived` が保存対象外になること、最大比較期間 30日から詳細 snapshot 保持期間 35日を算出できることを確認します。
+
+Repository / Feature テストでは、保持期間を超えた `dance_short_video_snapshots` だけが物理削除され、35日以内の snapshot、`dance_short_videos`、`dance_short_regions`、`dance_short_search_keywords`、`dance_short_video_categories` が削除されないことを確認します。
+
+Action / Command テストでは、sync 後に snapshot cleanup が実行されること、cleanup 件数が ResultDTO に反映されること、cleanup command が YouTube API を呼ばず単体実行できることを確認します。DanceShortsRadar の Scheduler はこの段階では追加せず、local で `schedule:run` / `schedule:work` や scheduler コンテナによる自動同期を増やしていないことも差分確認の対象にします。
+
 ## Mockを使う境界
 
 Mock は、テスト対象の責務を明確にするために使います。
