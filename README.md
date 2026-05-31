@@ -107,6 +107,7 @@ DTO はレイヤー間のデータキャリアとして扱います。
 - `/api-catalog`: API Discovery Hub の本番一覧
 - `/api-catalog/{apiKey}`: API詳細、調査メモ保存
 - `/api-catalog/mock`: UI確認用モック一覧
+- `/dance-shorts-radar`: Dance Shorts Radar の通常ランキング
 
 補助的なルートとして、`/api-preview/apis-guru`、`/api-preview/apis-guru/mock`、`/api-preview/apis-guru/mock-error`、`/api-catalog/sync`、`/api-catalog/sync/status`、`/api-catalog/mock/{apiKey}`、`/api-catalog/{apiKey}/notes` があります。
 
