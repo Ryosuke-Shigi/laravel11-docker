@@ -42,6 +42,8 @@ Service は業務判断、ドメインルール、状態判断を扱います。
 
 同期対象を有効とみなす条件、保存可能かどうか、状態遷移の可否など、HTTPやDB実装に依存しない判断を置きます。
 
+DanceShortsRadar の snapshot 比較値計算は `DanceShortSnapshotMetricService` に置きます。`current` / `previous` snapshot から `view_count_delta`、`view_growth_rate`、`views_per_hour` を算出し、許可する比較期間と並び替えキーの正規化を担当します。Service は DB query、YouTube API 呼び出し、Inertia props 生成は行いません。
+
 ### Repository
 
 Repository は DB 操作や外部データ取得の境界です。
@@ -107,6 +109,8 @@ Query は状態を変更しない取得処理です。
 - ステータス確認
 
 Command と Query を分けることで、テスト観点、DTO、Repositoryメソッド、Action の責務が明確になります。
+
+DanceShortsRadar のランキング Query は、保存済み `dance_short_video_snapshots` だけを読み、指定地域と比較期間に基づく表示用 DTO / ListDTO を返します。この Query では YouTube API 呼び出し、Scheduler 追加、Controller / Inertia props 生成、派生値の DB 保存は行いません。
 
 ## 責務違反の例
 
