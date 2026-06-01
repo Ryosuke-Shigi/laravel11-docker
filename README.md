@@ -143,6 +143,7 @@ docker compose up -d nginx php-fpm queue scheduler mysql redis minio mailpit adm
 docker compose run --rm composer install
 docker compose run --rm npm install
 docker compose run --rm artisan migrate
+docker compose run --rm artisan db:seed --class=DanceShortRegionSeeder
 docker compose run --rm npm npm run build
 ```
 
@@ -153,6 +154,12 @@ docker compose run --rm npm npm run build
 - Mailpit: http://localhost:8025
 - Adminer: http://localhost:8081
 - MinIO Console: http://localhost:9001
+
+Dance Shorts Radar の通常ランキング `/dance-shorts-radar` は、`dance_short_regions` の active な地域マスタから地域ボタンを表示します。ローカルで日本 / アメリカ / 韓国の地域ボタンを確認する場合は、migrate 後に次の Seeder を実行します。`DatabaseSeeder` からも同じ地域マスタ Seeder を呼び出します。
+
+```bash
+docker compose run --rm artisan db:seed --class=DanceShortRegionSeeder
+```
 
 ### ローカルS3 / MinIO
 
