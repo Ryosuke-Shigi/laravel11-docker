@@ -161,6 +161,15 @@ Dance Shorts Radar の通常ランキング `/dance-shorts-radar` は、`dance_s
 docker compose run --rm artisan db:seed --class=DanceShortRegionSeeder
 ```
 
+YouTube Data API から Dance Shorts Radar の候補を手動同期する場合は、地域マスタに加えて検索キーワードも投入してから同期 command を実行します。APIキーの実値は `src/.env` などリポジトリ外の環境変数で管理し、README や docs には書きません。
+
+```bash
+docker compose run --rm artisan db:seed --class=DanceShortSearchKeywordSeeder
+docker compose exec php-fpm php artisan dance-short:sync
+```
+
+`dance-short:sync` は Queue に同期 Job を投入する入口です。Queue worker が処理すると `dance_short_videos` に動画基本情報、`dance_short_video_snapshots` に取得時点の指標 snapshot が保存されます。通常ランキングは比較元 snapshot を使うため、空DBからの初回同期直後は保存済み snapshot があってもランキングが空になる場合があります。
+
 ### ローカルS3 / MinIO
 
 本番は AWS S3 を使い、ローカル開発では MinIO を S3 互換ストレージとして使います。
