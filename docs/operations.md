@@ -140,6 +140,76 @@ merge前に確認すること:
 - 秘密情報が混入していない
 - main へ反映してよい差分だけが残っている
 
+## PR merge 後の同期
+
+Pull Request を main に merge した後は、次の作業へ入る前にローカル側を main 最新へ戻します。
+
+```bash
+git switch main
+git pull --ff-only origin main
+```
+
+`laravel11-docker` では Docker構成側と Laravel本体 `/src` 側が別Gitの場合があります。
+
+Docker構成側の変更は、親側で pull します。
+
+```bash
+cd /var/www/api-discovery-hub
+git switch main
+git pull --ff-only origin main
+```
+
+Laravel本体や React 画面の変更は、`/src` 側で pull します。
+
+```bash
+cd /var/www/api-discovery-hub/src
+git switch main
+git pull --ff-only origin main
+```
+
+親側の `git pull` だけで `/src` 側の変更が反映されたとは扱いません。
+
+## laravel11-docker の本番反映方針
+
+`laravel11-docker` は Docker構成側のリポジトリとして扱います。
+
+Docker構成側の変更は本番影響が大きいため、GitHub Actions CDで自動反映せず、当面は人間が差分確認後に手動で反映します。
+
+本番反映が必要になる例:
+
+- `docker-compose.yml` を変更した
+- nginx 設定を変更した
+- queue / scheduler 構成を変更した
+- ports 設定を変更した
+- Dockerfile を変更した
+- 本番運用に必要な環境変数が増えた
+
+docs / AGENTS.md / templates のみの変更は、本番サービスへ即時反映しなくてよいです。
+
+本番へ手動反映する場合は、最低限以下を確認します。
+
+```bash
+cd /var/www/api-discovery-hub
+git status
+git pull --ff-only origin main
+docker compose config
+docker compose ps
+```
+
+Docker構成を再起動する必要がある場合のみ、内容を確認してから実行します。
+
+```bash
+docker compose up -d
+```
+
+不用意に以下を実行しません。
+
+```bash
+docker compose down -v
+docker system prune
+docker volume prune
+```
+
 ## deploy確認
 
 deployが必要な変更では、deploy前に影響範囲を確認します。
