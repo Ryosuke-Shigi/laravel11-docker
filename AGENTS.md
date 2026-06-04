@@ -15,9 +15,14 @@
 - [docs/architecture.md](docs/architecture.md): ADRパターンとレイヤードアーキテクチャ
 - [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
 - [docs/testing.md](docs/testing.md): TDDとテスト境界
+- [docs/logging.md](docs/logging.md): ログ分類と記録してよい情報
 - [docs/development-flow.md](docs/development-flow.md): 仕様整理からPRまでの流れ
+- [docs/operations.md](docs/operations.md): GitHub / PR / CI / deploy などの運用手順
+- [docs/setup.md](docs/setup.md): 初期構築とローカル確認手順
 - [docs/pr-checklist.md](docs/pr-checklist.md): PR前チェックリスト
 - [docs/security.md](docs/security.md): 秘密情報と本番環境の扱い
+- [docs/templates/instruction-summary.md](docs/templates/instruction-summary.md): 実装前の指示用まとめテンプレート
+- [docs/templates/pr-summary.md](docs/templates/pr-summary.md): PR本文用まとめテンプレート
 
 ## 責務境界
 
@@ -48,5 +53,7 @@ DTO / ListDTO に次の責務を持たせないでください。
 - `.env` の実値、APIキー、DBパスワード、AWSキーなどの秘密情報を書かない
 - 変更後は差分を確認する
 - テストが必要な変更では、既存のテスト方針に従って確認する
+- 指定範囲外の代替実装へ進まない
+- 責務境界、秘密情報、本番操作、仕様判断で迷う場合は作業を止めて人間に確認する
 
 今回のような docs のみの変更では、アプリテスト実行は必須ではありません。ただし、リンク切れ、Markdownの表示崩れ、目的外のコード変更がないことは確認してください。

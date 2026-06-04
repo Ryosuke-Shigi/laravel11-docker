@@ -45,9 +45,14 @@ AIエージェント用の入口と、設計・運用ドキュメントを分け
 - [docs/architecture.md](docs/architecture.md): ADRパターンとレイヤードアーキテクチャ
 - [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
 - [docs/testing.md](docs/testing.md): TDDとテスト境界
+- [docs/logging.md](docs/logging.md): ログ分類と記録してよい情報
 - [docs/development-flow.md](docs/development-flow.md): 仕様整理からPRまでの流れ
+- [docs/operations.md](docs/operations.md): GitHub / PR / CI / deploy などの運用手順
+- [docs/setup.md](docs/setup.md): 初期構築とローカル確認手順
 - [docs/pr-checklist.md](docs/pr-checklist.md): PR前チェックリスト
 - [docs/security.md](docs/security.md): 秘密情報と本番環境の扱い
+- [docs/templates/instruction-summary.md](docs/templates/instruction-summary.md): 実装前の指示用まとめテンプレート
+- [docs/templates/pr-summary.md](docs/templates/pr-summary.md): PR本文用まとめテンプレート
 
 ## AI駆動開発の運用方針
 
