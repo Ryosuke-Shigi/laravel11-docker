@@ -7,26 +7,63 @@ AIエージェントは差分作成、調査、レビュー補助を行えます
 ## 基本方針
 
 - main 直pushは禁止する
-- 作業は feature ブランチまたは docs ブランチで行う
+- 作業は `feature/xxx` 形式の feature ブランチで行う
 - PRで差分、確認結果、レビュー観点を説明する
-- CI結果を確認してから merge する
+- CI結果を確認し、ユーザーの明示指示を受けてから merge する
+- PRの差分確認・CI確認はChatGPTに依頼する
+- CI / status check が存在しない場合は、その旨を報告し、merge可否はユーザー判断にする
+- main への merge は、PR差分確認・CI確認後、ユーザーの明示指示を受けて行う
 - 本番環境をAIに直接操作させない
 - 秘密情報を Issue、PR、README、docs、AIへの指示文に書かない
 
-## featureブランチ作成
+## GitHub確認の対象
 
-作業開始前に main を最新化し、目的に合うブランチを作成します。
+作業確認時は、対象リポジトリと作業ルートを取り違えない。
+
+- `codex-practice001` と `laravel11-docker` を混同しない
+- `laravel11-docker` では Laravel 本体は `/src` 配下にある
+- GitHub上で確認する前に、対象リポジトリ名・作業ブランチ名・作業ルートを確認する
+- push前のローカル作業中は、GitHubに差分が見えなくて当然
+- Pull Request作成後に GitHub 側の差分確認を行う
+
+## 作業前確認
+
+作業開始前に、対象リポジトリ・作業ブランチ・作業ルートを確認する。
 
 ```bash
-git checkout main
-git pull --ff-only origin main
-git checkout -b feature/your-topic
+pwd
+ls
+git status
+git branch --show-current
 ```
 
-docs整備のみの場合は、次のような docs ブランチでもよいです。
+`laravel11-docker` では、Laravel本体は `/src` 配下にある。
+
+Laravel側の作業では、`/src` を基準に差分・テスト・ビルドを確認する。
+
+## Git運用
+
+- main 直pushは禁止
+- 作業ブランチは `feature/xxx` 形式で作成する
+- `/feature` ではなく `feature/xxx` と表記する
+- CodexAppは feature ブランチへの push 後、Pull Request を作成する
+- main への merge は、PR差分確認・CI確認後、ユーザーの明示指示を受けて行う
+- PRの差分確認・CI確認はChatGPTに依頼する
+- CI / status check が存在しない場合は、その旨を報告し、merge可否はユーザー判断にする
+- ChatGPTは、PR差分確認・CI確認・Notion追加・PDF化までは行う
+- ChatGPTは、ユーザーの明示指示なしに Pull Request を merge しない
+- ChatGPTが差分とCI / status check 有無を確認し、問題がなければ、ユーザーの指示を受けてPRをmergeする
+- 指示に明示がない限り、CodexAppは main へ merge しない
+- 「mainにmergeしてpushして」という指示は使わない
+
+## featureブランチ作成
+
+作業開始前に main を最新化し、目的に合う `feature/xxx` ブランチを作成します。
 
 ```bash
-git checkout -b docs/your-topic
+git switch main
+git pull --ff-only origin main
+git switch -c feature/your-topic
 ```
 
 ## 差分確認
@@ -65,18 +102,35 @@ PRに書くこと:
 
 ## CI確認
 
-PR作成後、CIの結果を確認します。
+PR作成後、CIの結果を確認します。PRの差分確認とCI確認はChatGPTに依頼します。
 
 確認すること:
 
 - Laravel test が成功している
 - React / TypeScript / Vite build が必要な変更で成功している
 - docsのみの変更でアプリテストを省略する場合、PR本文に未実行理由がある
+- CI / status check が存在しない場合は、その旨を報告し、CI確認済みとして扱わない
 - 失敗時はログを確認し、原因が今回差分か既存要因かを切り分ける
 
-## merge
+## ChatGPTによるPR確認
 
-merge は人間が判断します。
+Pull Request 作成後、ChatGPTはPR差分確認・CI確認・Notion追加・PDF化までを行います。
+
+- PR差分
+- 変更ファイル
+- CI / status check
+- テスト結果
+- docs / README / AGENTS.md 更新有無
+- 秘密情報が含まれていないか
+- main mergeしてよい状態か
+
+CI / status check が存在しない場合は、その旨を報告し、merge可否はユーザー判断にします。
+
+問題がなければ、必要に応じてNotion更新やPDF化を行います。ChatGPTは、ユーザーの明示指示なしに Pull Request を merge しません。
+
+## ユーザー指示後のmerge
+
+merge は人間が判断します。ChatGPTは、ユーザーの明示指示なしにPRをmergeしません。
 
 merge前に確認すること:
 
