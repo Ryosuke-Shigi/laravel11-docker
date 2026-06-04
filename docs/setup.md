@@ -4,6 +4,25 @@
 
 コマンドは WSL2 Ubuntu 上のプロジェクトルートで実行する前提です。Windows / PowerShell の UNC パス経由では、Docker の bind mount 都合で `docker compose run` が失敗する場合があります。
 
+## Laravel本体の場所
+
+このリポジトリでは Laravel 本体は `/src` 配下にある。
+
+Laravelコマンドを実行する場合は、原則 `/src` を基準にする。
+
+例:
+
+```bash
+cd src
+php artisan test
+php artisan migrate
+composer install
+npm install
+npm run build
+```
+
+Docker経由で実行する場合も、compose設定が `/src` を対象にしているか確認する。
+
 ## 初期構築
 
 Docker image を build します。

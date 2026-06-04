@@ -9,20 +9,31 @@
 
 仕様確定、責務境界、テスト観点、完成判定、本番反映判断は人間が行い、AIは実装補助、調査、差分修正、レビュー補助として使います。
 
-## 作業前に読むドキュメント
+## 作業ディレクトリ前提
+
+このリポジトリでは、Laravelアプリケーション本体は `/src` 配下にある。
+
+- Laravel / PHP / artisan / app / routes / database / tests / resources を触る作業は、必ず `/src` を基準に確認する
+- `php artisan`、`composer`、`npm`、`tests`、`routes`、`app`、`database` を扱う場合は `/src` 側のファイルを対象にする
+- リポジトリ直下は Docker / Makefile / README / infra 系の管理領域として扱う
+- 指示に「Laravel側」「src側」「アプリ側」とある場合は `/src` を作業ルートとする
+- `/src` 外に Laravel 用の `app/`、`routes/`、`database/`、`resources/` を新規作成しない
+- 判断に迷う場合は、作業前に `pwd` と `ls` で現在位置を確認してから進める
+
+## 参照ドキュメント
 
 - [README.md](README.md): アプリ概要、起動手順、テスト手順、PR運用の概要
-- [docs/architecture.md](docs/architecture.md): ADRパターンとレイヤードアーキテクチャ
+- [docs/architecture.md](docs/architecture.md): Laravel / ADR / レイヤードアーキテクチャの責務境界
 - [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
-- [docs/testing.md](docs/testing.md): TDDとテスト境界
-- [docs/logging.md](docs/logging.md): ログ分類と記録してよい情報
+- [docs/testing.md](docs/testing.md): テスト方針・TDD・確認コマンド
+- [docs/logging.md](docs/logging.md): ログ方針、ログ分類、記録してよい情報
 - [docs/development-flow.md](docs/development-flow.md): 仕様整理からPRまでの流れ
-- [docs/operations.md](docs/operations.md): GitHub / PR / CI / deploy などの運用手順
-- [docs/setup.md](docs/setup.md): 初期構築とローカル確認手順
+- [docs/operations.md](docs/operations.md): GitHub / PR / deploy / 本番確認 / Notion / PDF化などの運用手順
+- [docs/setup.md](docs/setup.md): 初期構築・Docker・.env.example・migrate・npm
 - [docs/pr-checklist.md](docs/pr-checklist.md): PR前チェックリスト
 - [docs/security.md](docs/security.md): 秘密情報と本番環境の扱い
-- [docs/templates/instruction-summary.md](docs/templates/instruction-summary.md): 実装前の指示用まとめテンプレート
-- [docs/templates/pr-summary.md](docs/templates/pr-summary.md): PR本文用まとめテンプレート
+- [docs/templates/instruction-summary.md](docs/templates/instruction-summary.md): 指示用まとめの型
+- [docs/templates/pr-summary.md](docs/templates/pr-summary.md): PR用まとめの型
 
 ## 責務境界
 

@@ -1,4 +1,4 @@
-# PR Summary Template
+# PR用まとめ
 
 Pull Request本文用テンプレートです。
 
