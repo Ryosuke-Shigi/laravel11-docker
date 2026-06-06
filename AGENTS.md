@@ -27,6 +27,7 @@
 - [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
 - [docs/testing.md](docs/testing.md): テスト方針・TDD・確認コマンド
 - [docs/logging.md](docs/logging.md): ログ方針、ログ分類、記録してよい情報
+- [docs/commenting.md](docs/commenting.md): 通常コメント・PHPDoc・JSDocの運用方針
 - [docs/development-flow.md](docs/development-flow.md): 仕様整理からPRまでの流れ
 - [docs/operations.md](docs/operations.md): GitHub / PR / deploy / 本番確認 / Notion / PDF化などの運用手順
 - [docs/setup.md](docs/setup.md): 初期構築・Docker・.env.example・migrate・npm
@@ -56,6 +57,12 @@ DTO / ListDTO に次の責務を持たせないでください。
 - JSONレスポンス生成
 - View / Inertia / React 用の表示判断
 
+## コメント方針
+
+- 通常コメント・PHPDoc・JSDocは、必要な箇所に日本語で残す
+- コメントの詳細ルールは [docs/commenting.md](docs/commenting.md) に従う
+- コメントで処理変更や責務違反を正当化しない
+
 ## 作業ルール
 
 - 変更対象ファイルと変更方針を確認してから編集する
@@ -66,5 +73,3 @@ DTO / ListDTO に次の責務を持たせないでください。
 - テストが必要な変更では、既存のテスト方針に従って確認する
 - 指定範囲外の代替実装へ進まない
 - 責務境界、秘密情報、本番操作、仕様判断で迷う場合は作業を止めて人間に確認する
-
-今回のような docs のみの変更では、アプリテスト実行は必須ではありません。ただし、リンク切れ、Markdownの表示崩れ、目的外のコード変更がないことは確認してください。
