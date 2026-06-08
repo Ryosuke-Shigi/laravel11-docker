@@ -61,7 +61,11 @@ Repository は DB 操作や外部データ取得の境界です。
 
 検索条件、永続化、Eloquent クエリの結果を確認したい場合は、Featureテストや統合寄りのテストで確認します。Service の業務判断を確認したいだけなら、Repository は Mock に置き換えることを検討します。
 
-DanceShortsRadar の DB 保存 Repository では、`youtube_video_id` による動画本体の upsert、重複 insert 防止、snapshot の追加保存、最新 snapshot 取得を確認します。Shorts 判定や伸び率の意味づけは Repository テストへ持ち込まず、Service テストで確認します。
+DanceShortsRadar の DB 保存 Repository では、`youtube_video_id` による動画本体の insert/update、重複 insert 防止、snapshot 保存、最新 snapshot 取得を確認します。Shorts 判定や伸び率の意味づけは Repository テストへ持ち込まず、Service テストで確認します。
+
+DanceShortsRadar の snapshot 専用同期では、search.list を呼ばず保存済み active 動画だけを videos.list で継続観測することを Feature テストで固定します。active 動画IDは50件単位で `fetchVideoDetails()` へ渡し、JST12時間枠内に既存 snapshot がある場合は create し続けず同枠最新1件を update します。同枠に snapshot がない場合は create し、`collected_at` / `view_count` / `like_count` / `comment_count` が最新値へ更新されることを確認します。
+
+DanceShortsRadar の snapshot 専用同期 Scheduler は、毎時15分・45分の登録、`withoutOverlapping()`、既存の sync enabled gate を Feature テストで固定します。Job は `RefreshDanceShortVideoSnapshotsAction` を呼ぶだけにし、`ShouldBeUnique` の固定 uniqueId で snapshot 専用同期全体の同時実行防止を確認します。
 
 DanceShortsRadar の tracking / retention / cleanup では、Service テストで `active` の動画だけが snapshot 保存対象になること、`inactive` / `archived` が保存対象外になること、最大比較期間 30日から詳細 snapshot 保持期間 35日を算出できることを確認します。
 
