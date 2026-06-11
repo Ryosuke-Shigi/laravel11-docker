@@ -10,6 +10,8 @@ AIエージェントはこの流れの一部を補助しますが、仕様確定
 
 目的、対象ユーザー、画面導線、入力、出力、成功条件、失敗時の扱いを整理します。AIへ依頼する前に、最低限の仕様境界を人間が決めます。
 
+UIを扱う場合は、MOCK / PROTOTYPE / PRODUCT のどの工程かを決めます。工程ごとの扱いは [ui-development-flow.md](ui-development-flow.md) に従います。
+
 ## 2. 入力定義
 
 画面入力、URL query、route parameter、外部API入力、Command 引数などを整理します。
@@ -56,6 +58,8 @@ AIエージェントへ渡す指示には、次の情報を含めます。
 
 秘密情報や `.env` の実値は、AIへの指示に含めません。
 
+UI作業では、MOCKで確認する画面単体のUI契約、PROTOTYPEで確認する画面間導線、PRODUCTで引き継ぐComponent構造・props・状態・本データ接続点を分けて指示します。
+
 ## 8. 実装
 
 AIエージェントまたは人間が、決めた範囲内で実装します。
@@ -77,6 +81,14 @@ React / TypeScript / Vite の確認:
 ```bash
 docker compose run --rm npm npm run build
 ```
+
+TypeScript / TSX を変更した場合は、必要に応じて手元確認として次を実行します。
+
+```bash
+docker compose run --rm npm npm run typecheck
+```
+
+`npm run typecheck` は現時点では CI 必須ゲートではありません。既存型エラーが残っている間は、CI 必須化を別PRで扱います。
 
 docs のみの変更では、Markdown表示、リンク、差分範囲の確認を優先します。
 

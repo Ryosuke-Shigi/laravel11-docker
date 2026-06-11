@@ -7,7 +7,7 @@ AIエージェントは差分作成、調査、レビュー補助を行えます
 ## 基本方針
 
 - main 直pushは禁止する
-- 作業は `feature/xxx` 形式の feature ブランチで行う
+- 作業は目的に合わせて `feature/xxx`、`fix/xxx`、`docs/xxx` 形式の作業ブランチで行う
 - PRで差分、確認結果、レビュー観点を説明する
 - CI結果を確認し、ユーザーの明示指示を受けてから merge する
 - PRの差分確認・CI確認はChatGPTに依頼する
@@ -44,9 +44,9 @@ Laravel側の作業では、`/src` を基準に差分・テスト・ビルドを
 ## Git運用
 
 - main 直pushは禁止
-- 作業ブランチは `feature/xxx` 形式で作成する
-- `/feature` ではなく `feature/xxx` と表記する
-- CodexAppは feature ブランチへの push 後、Pull Request を作成する
+- 作業ブランチは目的に合わせて `feature/xxx`、`fix/xxx`、`docs/xxx` 形式で作成する
+- `/feature` ではなく `feature/xxx` のようにprefix付きブランチ名で表記する
+- CodexAppは作業ブランチへの push 後、Pull Request を作成する
 - main への merge は、PR差分確認・CI確認後、ユーザーの明示指示を受けて行う
 - PRの差分確認・CI確認はChatGPTに依頼する
 - CI / status check が存在しない場合は、その旨を報告し、merge可否はユーザー判断にする
@@ -56,14 +56,14 @@ Laravel側の作業では、`/src` を基準に差分・テスト・ビルドを
 - 指示に明示がない限り、CodexAppは main へ merge しない
 - 「mainにmergeしてpushして」という指示は使わない
 
-## featureブランチ作成
+## 作業ブランチ作成
 
-作業開始前に main を最新化し、目的に合う `feature/xxx` ブランチを作成します。
+作業開始前に main を最新化し、目的に合う作業ブランチを作成します。
 
 ```bash
 git switch main
 git pull --ff-only origin main
-git switch -c feature/your-topic
+git switch -c docs/your-topic
 ```
 
 ## 差分確認
@@ -111,6 +111,9 @@ PR作成後、CIの結果を確認します。PRの差分確認とCI確認はCha
 
 - Laravel test が成功している
 - React / TypeScript / Vite build が必要な変更で成功している
+- Vitest が成功している
+- Laravel Pint check が成功している
+- `npm run typecheck` は現時点では CI 必須ゲートではなく、TypeScript / TSX 変更時の手元確認コマンドとして扱う
 - docsのみの変更でアプリテストを省略する場合、PR本文に未実行理由がある
 - CI / status check が存在しない場合は、その旨を報告し、CI確認済みとして扱わない
 - 失敗時はログを確認し、原因が今回差分か既存要因かを切り分ける

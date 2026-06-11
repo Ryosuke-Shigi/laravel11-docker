@@ -42,9 +42,14 @@ API Discovery Hub は、APIs.guru の公開APIカタログ `list.json` を同期
 AIエージェント用の入口と、設計・運用ドキュメントを分けています。
 
 - [AGENTS.md](AGENTS.md): AIエージェントが最初に読む薄い入口
+- [docs/index.md](docs/index.md): docs全体の目次と作業別の参照先
 - [docs/architecture.md](docs/architecture.md): ADRパターンとレイヤードアーキテクチャ
 - [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
+- [docs/coding-standards.md](docs/coding-standards.md): 実装作法、型、CI必須ゲートと手元確認コマンド
 - [docs/testing.md](docs/testing.md): TDDとテスト境界
+- [docs/ui-development-flow.md](docs/ui-development-flow.md): MOCK / PROTOTYPE / PRODUCT のUI作成工程
+- [docs/frontend.md](docs/frontend.md): React / TypeScript / Inertia のフロントエンド方針
+- [docs/ui.md](docs/ui.md): UI設計、状態表示、レスポンシブ確認の方針
 - [docs/logging.md](docs/logging.md): ログ分類と記録してよい情報
 - [docs/commenting.md](docs/commenting.md): 通常コメント・PHPDoc・JSDocの運用方針
 - [docs/development-flow.md](docs/development-flow.md): 仕様整理からPRまでの流れ
