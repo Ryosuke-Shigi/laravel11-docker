@@ -42,6 +42,7 @@ API Discovery Hub は、APIs.guru の公開APIカタログ `list.json` を同期
 AIエージェント用の入口と、設計・運用ドキュメントを分けています。
 
 - [AGENTS.md](AGENTS.md): AIエージェントが最初に読む薄い入口
+- [docs/md-router.md](docs/md-router.md): 作業種別ごとに読むdocs、読まないdocs、停止条件、作業後の保守ルール
 - [docs/architecture.md](docs/architecture.md): ADRパターンとレイヤードアーキテクチャ
 - [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
 - [docs/testing.md](docs/testing.md): TDDとテスト境界

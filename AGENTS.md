@@ -23,6 +23,7 @@
 ## 参照ドキュメント
 
 - [README.md](README.md): アプリ概要、起動手順、テスト手順、PR運用の概要
+- [docs/md-router.md](docs/md-router.md): 作業種別ごとに読むdocs、読まないdocs、停止条件、作業後の保守ルールを決める入口
 - [docs/architecture.md](docs/architecture.md): Laravel / ADR / レイヤードアーキテクチャの責務境界
 - [docs/dto.md](docs/dto.md): DTO / ListDTO の設計方針
 - [docs/testing.md](docs/testing.md): テスト方針・TDD・確認コマンド
