@@ -20,6 +20,35 @@
 - `/src` 外に Laravel 用の `app/`、`routes/`、`database/`、`resources/` を新規作成しない
 - 判断に迷う場合は、作業前に `pwd` と `ls` で現在位置を確認してから進める
 
+## src 側 AGENTS.md の参照ルール
+
+このリポジトリの root は Docker / nginx / php-fpm / mysql / redis / npm / queue / scheduler などの外側構成を扱う。
+
+Laravel アプリ本体は `src/` 配下にあり、別 Git リポジトリとして扱う。
+
+次の作業を行う場合は、root の `AGENTS.md` だけで判断せず、作業前に必ず `src/AGENTS.md` を読むこと。
+
+- `app/`
+- `routes/`
+- `resources/`
+- `database/`
+- `config/`
+- `tests/`
+- `public/`
+- `artisan`
+- `composer.json`
+- `package.json`
+- `vite.config.*`
+- `phpunit.xml`
+- Laravel / React / Inertia / TypeScript の画面・機能修正
+
+Docker 構成だけを変更する場合は、root 側の `AGENTS.md` を正本とする。
+
+Docker 構成と Laravel アプリ本体の両方に関わる場合は、root の `AGENTS.md` と `src/AGENTS.md` の両方を必ず読むこと。
+
+root 側の `git status` / `git pull` が最新でも、`src/` 側が最新とは限らない。
+Laravel / React 本体の確認・修正・反映では、必ず `src/` 側の状態も確認すること。
+
 ## 参照ドキュメント
 
 - [README.md](README.md): アプリ概要、起動手順、テスト手順、PR運用の概要
