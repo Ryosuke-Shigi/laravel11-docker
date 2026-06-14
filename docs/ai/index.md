@@ -13,16 +13,18 @@
 
 1. [AGENTS.md](../../AGENTS.md)
 2. [docs/ai/rules/root-repository.md](rules/root-repository.md)
-3. Laravel / React / アプリdocs / tests / `src/` を触る場合は [src/AGENTS.md](../../src/AGENTS.md)
-4. アプリ側AI docsを確認する場合は [src/docs/ai/index.md](../../src/docs/ai/index.md)
+3. Laravel / React / アプリdocs / tests / `src/` を触る場合は `src/AGENTS.md`
+4. アプリ側AI docsを確認する場合は `src/docs/ai/index.md`
+
+`src/` は別Gitリポジトリとして扱うため、GitHub上では必要に応じて `Ryosuke-Shigi/codex-practice001` 側のPRまたはdocsを参照します。
 
 ## MD一覧
 
 | Path | Role |
 |---|---|
 | [docs/ai/rules/root-repository.md](rules/root-repository.md) | root / `src` 境界、Docker管理領域、root `AGENTS.md` から退避した詳細ルール |
-| [src/AGENTS.md](../../src/AGENTS.md) | アプリ側作業の入口 |
-| [src/docs/ai/index.md](../../src/docs/ai/index.md) | アプリ側AI docsの索引 |
+| `src/AGENTS.md` | アプリ側作業の入口 |
+| `src/docs/ai/index.md` | アプリ側AI docsの索引 |
 
 ## 配置ルール
 
