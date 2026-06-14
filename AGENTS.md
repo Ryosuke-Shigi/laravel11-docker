@@ -1,88 +1,30 @@
 # AGENTS.md
 
 このファイルは、AIエージェントが最初に読むための root 側入口です。
-Docker 構成はこのファイルを基準にし、Laravel アプリ本体は必ず `src/AGENTS.md` を参照してください。
 
-## 基本方針
+root は Docker / nginx / php-fpm / mysql / redis / npm / queue / scheduler などの外側構成を扱い、Laravel アプリ本体は `src/` 配下の別Gitリポジトリとして扱います。
 
-このリポジトリでは、AIを丸投げ実装者として扱いません。
+## 最初に読むもの
 
-仕様確定、責務境界、テスト観点、完成判定、本番反映判断は人間が行い、AIは実装補助、調査、差分修正、レビュー補助として使います。
+1. root 側の作業では [docs/ai/index.md](docs/ai/index.md)
+2. Laravel / React / アプリdocs / tests / `src/` 側の作業では [src/AGENTS.md](src/AGENTS.md)
+3. root と `src/` の両方に関わる場合は、このファイル、[docs/ai/index.md](docs/ai/index.md)、[src/AGENTS.md](src/AGENTS.md)、[src/docs/ai/index.md](src/docs/ai/index.md)
 
-## 作業ディレクトリ前提
+## root 側の詳細ルール
 
-このリポジトリでは、Laravelアプリケーション本体は `/src` 配下にある。
+root 側の詳細ルールは [docs/ai/rules/root-repository.md](docs/ai/rules/root-repository.md) を参照してください。
 
-- Laravel / PHP / artisan / app / routes / database / tests / resources を触る作業は、必ず `/src` を基準に確認する
-- `php artisan`、`composer`、`npm`、`tests`、`routes`、`app`、`database` を扱う場合は `/src` 側のファイルを対象にする
-- リポジトリ直下は Docker / Makefile / infra 系の管理領域として扱う
-- 指示に「Laravel側」「src側」「アプリ側」とある場合は `/src` を作業ルートとする
+この入口には詳細本文を増やさず、参照先だけを置きます。
+
+## Git境界
+
+- root 側repo: Docker / infra 管理領域
+- `src/` 側repo: Laravel / React / app docs / tests 管理領域
+- root 側の状態が最新でも `src/` 側が最新とは限らないため、`src/` を触る場合は必ず `src/` 側のGit状態も確認する
+
+## 禁止事項
+
 - `/src` 外に Laravel 用の `app/`、`routes/`、`database/`、`resources/` を新規作成しない
-- 判断に迷う場合は、作業前に `pwd` と `ls` で現在位置を確認してから進める
-
-## src 側 AGENTS.md の参照ルール
-
-このリポジトリの root は Docker / nginx / php-fpm / mysql / redis / npm / queue / scheduler などの外側構成を扱う。
-
-Laravel アプリ本体は `src/` 配下にあり、別 Git リポジトリとして扱う。
-
-次の作業を行う場合は、root の `AGENTS.md` だけで判断せず、作業前に必ず `src/AGENTS.md` を読むこと。
-
-- `app/`
-- `routes/`
-- `resources/`
-- `database/`
-- `config/`
-- `tests/`
-- `public/`
-- `artisan`
-- `composer.json`
-- `package.json`
-- `vite.config.*`
-- `phpunit.xml`
-- Laravel / React / Inertia / TypeScript の画面・機能修正
-
-Docker 構成だけを変更する場合は、root 側の `AGENTS.md` を正本とする。
-
-Docker 構成と Laravel アプリ本体の両方に関わる場合は、root の `AGENTS.md` と `src/AGENTS.md` の両方を必ず読むこと。
-
-root 側の `git status` / `git pull` が最新でも、`src/` 側が最新とは限らない。
-Laravel / React 本体の確認・修正・反映では、必ず `src/` 側の状態も確認すること。
-
-## 責務境界
-
-- Controller は HTTP 入口に限定する
-- Request は形式バリデーションに限定する
-- Action はユースケース手順を扱う
-- Service は業務判断、ドメインルール、状態判断を扱う
-- Repository は DB 操作や外部データ取得の境界を扱う
-- DTO / ListDTO はレイヤー間のデータキャリアとして扱う
-- Responder はレスポンスや Inertia props などの出力整形を扱う
-- Component は画面表示責務に限定する
-
-## DTOで禁止すること
-
-DTO / ListDTO に次の責務を持たせないでください。
-
-- DBアクセス
-- 業務判断
-- HTTPレスポンス生成
-- JSONレスポンス生成
-- View / Inertia / React 用の表示判断
-
-## コメント方針
-
-- 通常コメント・PHPDoc・JSDocは、必要な箇所に日本語で残す
-- Laravel / React / TypeScript 側のコメント詳細ルールは、作業前に `src/AGENTS.md` で確認する
-- コメントで処理変更や責務違反を正当化しない
-
-## 作業ルール
-
-- 変更対象ファイルと変更方針を確認してから編集する
-- 最小差分で修正する
-- 目的外のアプリ機能追加、DB変更、Docker構成変更をしない
 - `.env` の実値、APIキー、DBパスワード、AWSキーなどの秘密情報を書かない
-- 変更後は差分を確認する
-- テストが必要な変更では、既存のテスト方針に従って確認する
-- 指定範囲外の代替実装へ進まない
-- 責務境界、秘密情報、本番操作、仕様判断で迷う場合は作業を止めて人間に確認する
+- 目的外のアプリ機能追加、DB変更、Docker構成変更をしない
+- 既存の未コミット差分を勝手に変更・削除しない
