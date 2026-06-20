@@ -116,9 +116,8 @@ services:
 
   mysql:
     image: mysql:8.0
-    ports:
-      # Optional host access for DB tools. Laravel containers still use mysql:3306 internally.
-      - "127.0.0.1:3307:3306"
+    # MySQL is only used by containers on the internal Docker network.
+    # Do not publish 3306/3307 to the host; services connect with the "mysql" host name.
     environment:
       MYSQL_DATABASE: laravel
       MYSQL_USER: laravel
