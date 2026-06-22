@@ -42,6 +42,19 @@ services:
       redis:
         condition: service_started
 
+  reverb:
+    <<: *php-service
+    # Laravel Reverb WebSocket server. Keep it internal until nginx reverse proxy is configured.
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    restart: unless-stopped
+    expose:
+      - 8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   php-cli:
     <<: *php-service
     # General PHP CLI runner. Example: docker compose run --rm php-cli -v
