@@ -1,14 +1,14 @@
 DC ?= docker compose
 # Default local stack. MinIO is included so Storage::disk('s3') works after a
 # normal "make up" without starting object storage by hand.
-APP_SERVICES ?= nginx php-fpm queue scheduler mysql redis minio mailpit adminer
+APP_SERVICES ?= nginx php-fpm queue scheduler mysql redis reverb minio mailpit adminer
 
 cmd ?=
 c ?= $(cmd)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build rebuild up start down stop restart ps logs logs-app shell php artisan art a optimize-clear clear app-clear optimize migrate seed tinker composer composer-dump dump dump-autoload npm npm-install npm-build npm-dev dev vite test queue-up queue scheduler-up scheduler minio-up minio-logs minio-ps
+.PHONY: help build rebuild up start down stop restart ps logs logs-app shell php artisan art a optimize-clear clear app-clear optimize migrate seed tinker composer composer-dump dump dump-autoload npm npm-install npm-build npm-dev dev vite test queue-up queue scheduler-up scheduler reverb-up reverb reverb-logs reverb-ps minio-up minio-logs minio-ps
 
 help: ## Show available shortcuts
 	@awk 'BEGIN {FS = ":.*##"; printf "\nLaravel Docker shortcuts\n\n"} /^[a-zA-Z0-9_.-]+:.*##/ {printf "  %-16s %s\n", $$1, $$2} END {printf "\nExamples:\n  make up\n  make clear\n  make artisan cmd=\"route:list\"\n  make composer c=\"install\"\n  make npm c=\"run build\"\n\n"}' $(MAKEFILE_LIST)
@@ -19,7 +19,7 @@ build: ## Build Docker images
 rebuild: ## Rebuild Docker images without cache
 	$(DC) build --no-cache
 
-up: ## Start nginx, php-fpm, queue, scheduler, mysql, redis, minio, mailpit, and adminer
+up: ## Start nginx, php-fpm, queue, scheduler, mysql, redis, reverb, minio, mailpit, and adminer
 	$(DC) up -d $(APP_SERVICES)
 
 start: up ## Alias for up
@@ -37,8 +37,8 @@ ps: ## Show container status
 logs: ## Follow logs for the default stack
 	$(DC) logs -f --tail=100 $(APP_SERVICES)
 
-logs-app: ## Follow nginx and php-fpm logs
-	$(DC) logs -f --tail=100 nginx php-fpm
+logs-app: ## Follow nginx, php-fpm, and reverb logs
+	$(DC) logs -f --tail=100 nginx php-fpm reverb
 
 shell: ## Open a shell in the Laravel app directory
 	$(DC) run --rm --no-deps php-fpm sh
@@ -112,6 +112,17 @@ scheduler-up: ## Start the scheduler
 	$(DC) up -d scheduler
 
 scheduler: scheduler-up ## Alias for scheduler-up
+
+reverb-up: ## Start Laravel Reverb for local websocket upstream
+	$(DC) up -d reverb
+
+reverb: reverb-up ## Alias for reverb-up
+
+reverb-logs: ## Show recent Reverb logs
+	$(DC) logs --tail=50 reverb
+
+reverb-ps: ## Show Reverb container status
+	$(DC) ps reverb
 
 # Start only object storage when the rest of the stack is already running.
 minio-up: ## Start local MinIO
