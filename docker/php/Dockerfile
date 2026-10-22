@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.3.36-fpm
 
 # UID/GID 1000 matches the default WSL2 Ubuntu user in this learning environment.
 ARG UID=1000
